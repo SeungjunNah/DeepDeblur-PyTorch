@@ -94,7 +94,7 @@ class Loss(torch.nn.modules.loss._Loss):
                 if metric_type == 'PSNR':
                     metric_func = PSNR()
                 elif metric_type == 'SSIM':
-                    metric_func = SSIM(args.device_type, args.dtype_eval)
+                    metric_func = SSIM(args.device_type)    # single precision
                 else:
                     raise NotImplementedError
 
@@ -175,6 +175,11 @@ class Loss(torch.nn.modules.loss._Loss):
                 self.loss_stat[self.mode][loss_type][self.epoch] = 0
             self.loss_stat[self.mode]['Total'][self.epoch] = 0
 
+        if isinstance(input, list):
+            count = input[0].shape[0]
+        else:   # Tensor
+            count = input.shape[0]  # batch size
+
         for loss_type in self.loss_types:
 
             if loss_type == 'ADV':
@@ -182,12 +187,12 @@ class Loss(torch.nn.modules.loss._Loss):
             else:
                 _loss = _ms_forward(input, target, self.loss[loss_type]) * self.weight[loss_type]
 
-            self.loss_stat[self.mode][loss_type][self.epoch] += _loss.item()
-            self.loss_stat[self.mode]['Total'][self.epoch] += _loss.item()
+            self.loss_stat[self.mode][loss_type][self.epoch] += _loss.item() * count
+            self.loss_stat[self.mode]['Total'][self.epoch] += _loss.item() * count
 
             loss += _loss
 
-        self.count += 1
+        self.count += count
 
         if not self.training and self.do_measure:
             self.measure(input, target)
@@ -210,6 +215,11 @@ class Loss(torch.nn.modules.loss._Loss):
             for metric_type in self.metric_stat[self.mode]:
                 self.metric_stat[self.mode][metric_type][self.epoch] = 0
 
+        if isinstance(input, list):
+            count = input[0].shape[0]
+        else:   # Tensor
+            count = input.shape[0]  # batch size
+
         for metric_type in self.metric_stat[self.mode]:
 
             input = input.clamp(0, self.rgb_range)  # not in_place
@@ -217,9 +227,9 @@ class Loss(torch.nn.modules.loss._Loss):
                 input.round_()
 
             _metric = self.metric[metric_type](input, target)
-            self.metric_stat[self.mode][metric_type][self.epoch] += _metric.item()
+            self.metric_stat[self.mode][metric_type][self.epoch] += _metric.item() * count
 
-        self.count_m += 1
+        self.count_m += count
 
         return
 

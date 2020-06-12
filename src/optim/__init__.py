@@ -150,7 +150,7 @@ class Optimizer(object):
         else:
             self.D = None
 
-        self.load(args.startEpoch-1)
+        self.load(args.loadEpoch)
 
     def _amp_name(self):
         return os.path.join(self.args.save_dir, 'amp.pt')
@@ -192,7 +192,7 @@ class Optimizer(object):
         if self.D is not None:
             self.D._register_scheduler(self.scheduler_class, self.kwargs_scheduler)
 
-        self.load(self.args.startEpoch-1, load_amp=False)   # this is correct
+        self.load(self.args.loadEpoch, load_amp=False)   # this is correct
 
         return model
 

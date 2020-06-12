@@ -110,6 +110,7 @@ group_log.add_argument('--save_dir', type=str, default='', help='subdirectory to
 # group_log.add_argument('--load_dir', type=str, default='.', help='subdirectory to load experiment logs')
 group_log.add_argument('--startEpoch', type=int, default=-1, help='(re)starting epoch number')
 group_log.add_argument('--endEpoch', type=int, default=1000, help='ending epoch number')
+group_log.add_argument('--loadEpoch', type=int, default=-1, help='epoch number to load model (startEpoch-1 for training, startEpoch for testing)')
 group_log.add_argument('--save_every', type=int, default=10, help='save model/optimizer at every N epochs')
 group_log.add_argument('--save_results', type=str, default='part', choices=('none', 'part', 'all'), help='save none/part/all of result images')
 
@@ -149,6 +150,9 @@ elif args.startEpoch == 0:
         shutil.rmtree(args.save_dir, ignore_errors=True)
     os.makedirs(args.save_dir, exist_ok=True)
     args.startEpoch = 1
+
+if args.loadEpoch < 0:  # loadEpoch == startEpoch when doing a post-training test for a specific epoch
+    args.loadEpoch = args.startEpoch - 1
 
 argname = os.path.join(args.save_dir, 'args.pt')
 argname_txt = os.path.join(args.save_dir, 'args.txt')
@@ -195,6 +199,11 @@ if args.demo:
 
     if args.demo_output_dir.find('/') != 0 and args.demo_output_dir.find('./') != 0:
         args.demo_output_dir = os.path.join(str(os.getenv("HOME")), args.demo_output_dir)
+
+    args.save_results = 'all'
+
+if args.amp:
+    args.precision = 'single'   # model parameters should stay in fp32
 
 if args.seed < 0:
     args.seed = int(time.time())

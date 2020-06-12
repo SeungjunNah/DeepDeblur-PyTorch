@@ -58,7 +58,7 @@ class Trainer():
 
     def load(self, epoch=None, pretrained=None):
         if epoch is None:
-            epoch = self.args.startEpoch
+            epoch = self.args.loadEpoch
         self.model.load(epoch, pretrained)
         self.optimizer.load(epoch, load_amp=self.args.amp)
         self.criterion.load(epoch)
@@ -85,7 +85,7 @@ class Trainer():
         if self.is_slave:
             tq = self.loaders[self.mode]
         else:
-            tq = tqdm(self.loaders[self.mode], ncols=80, smoothing=0, bar_format='{desc} |{bar}{r_bar}')
+            tq = tqdm(self.loaders[self.mode], ncols=80, smoothing=0, bar_format='{desc}|{bar}{r_bar}')
 
         torch.set_grad_enabled(True)
         for idx, batch in enumerate(tq):
@@ -138,7 +138,7 @@ class Trainer():
         if self.is_slave:
             tq = self.loaders[self.mode]
         else:
-            tq = tqdm(self.loaders[self.mode], ncols=80, smoothing=0, bar_format='{desc} |{bar}{r_bar}')
+            tq = tqdm(self.loaders[self.mode], ncols=80, smoothing=0, bar_format='{desc}|{bar}{r_bar}')
 
         compute_loss = True
         torch.set_grad_enabled(False)
@@ -193,6 +193,9 @@ class Trainer():
         return
 
     def fill_evaluation(self, epoch, mode=None, force=False):
+        if epoch <= 0:
+            return
+
         if mode is not None:
             self.mode = mode
 
@@ -208,7 +211,11 @@ class Trainer():
             do_eval = loss_missing or metric_missing
 
         if do_eval:
-            self.load(epoch)
-            self.evaluate(epoch, self.mode)
+            try:
+                self.load(epoch)
+                self.evaluate(epoch, self.mode)
+            except:
+                # print('saved model/optimizer at epoch {} not found!'.format(epoch))
+                pass
 
         return

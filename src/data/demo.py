@@ -18,6 +18,5 @@ class Demo(Dataset):
 
     def __getitem__(self, idx):
         blur, sharp, idx, relpath = super(Demo, self).__getitem__(idx)
-        relpath = relpath.replace('{}/'.format(self.blur_key), '')
 
         return blur, sharp, idx, relpath

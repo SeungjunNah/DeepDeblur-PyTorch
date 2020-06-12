@@ -46,18 +46,16 @@ pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cud
 
 ## Usage examples
 
-Put the datasets on a desired directory. By default, the data root is set as '~/Research/dataset'
-See: src/option.py
+Put the datasets on a desired directory. By default, the data root is set as '~/Research/dataset'  
+See: [src/option.py](src/option.py)
 ```python
 group_data.add_argument('--data_root', type=str, default='~/Research/dataset', help='dataset root location')
 ```
 
 ```bash
 # single GPU training
-python main.py --n_GPUs 1 --batch_size 8
-
-# half precision testing (single precision for training, do not mix with mixed-precision training)
-python main.py --n_GPUs 1 --batch_size 8 --precision half
+python main.py --n_GPUs 1 --batch_size 8 # save the results in default experiment/YYYY-MM-DD_hh-mm-ss
+python main.py --n_GPUs 1 --batch_size 8 --save_dir GOPRO_L1  # save the results in experiment/GOPRO_L1
 
 # adversarial training
 python main.py --n_GPUs 1 --batch_size 8 --loss 1*L1+1*ADV
@@ -68,6 +66,13 @@ python main.py --n_GPUs 1 --batch_size 8 --loss 1*L1+0.1*ADV
 python main.py --n_GPUs 1 --batch_size 8 --dataset GOPRO_Large
 # train with REDS dataset (always set --do_test false)
 python main.py --n_GPUs 1 --batch_size 8 --dataset REDS --do_test false --milestones 100 150 180 --endEpoch 200
+
+# save part of the evaluation results (default)
+python main.py --n_GPUs 1 --batch_size 8 --dataset GOPRO_Large --save_results part
+# save no evaluation results (faster at test time)
+python main.py --n_GPUs 1 --batch_size 8 --dataset GOPRO_Large --save_results none
+# save all of the evaluation results
+python main.py --n_GPUs 1 --batch_size 8 --dataset GOPRO_Large --save_results all
 ```
 
 ```bash
@@ -76,13 +81,24 @@ python main.py --n_GPUs 2 --batch_size 16
 ```
 
 ```bash
-# multi-GPU training (DistributedDataParallel), recommended
+# multi-GPU training (DistributedDataParallel), recommended for the best speed
 # single command version (do not set ranks)
 python launch.py --n_GPUs 2 main.py --batch_size 16
 
-# multi-command version (type in independent shells with the corresponding ranks)
+# multi-command version (type in independent shells with the corresponding ranks, useful for debugging)
 python main.py --batch_size 16 --distributed true --n_GPUs 2 --rank 0 # shell 0
 python main.py --batch_size 16 --distributed true --n_GPUs 2 --rank 1 # shell 1
+```
+
+```bash
+# single precision inference (default)
+python launch.py --n_GPUs 2 main.py --batch_size 16 --precision single
+
+# half precision inference (faster and requires less memory)
+python launch.py --n_GPUs 2 main.py --batch_size 16 --precision half
+
+# half precision inference with AMP (Apex required)
+python launch.py --n_GPUs 2 main.py --batch_size 16 --amp true
 ```
 
 ```bash
@@ -94,7 +110,8 @@ python launch.py --n_GPUs 2 main.py --batch_size 16 --amp true
 ```
 
 ```bash
-# Advanced usage (recommended)
+# Advanced usage examples 
+# using launch.py is recommended for the best speed and convenience
 python launch.py --n_GPUs 4 main.py --dataset GOPRO_Large
 python launch.py --n_GPUs 4 main.py --dataset GOPRO_Large --milestones 500 750 900 --endEpoch 1000 --save_results none
 python launch.py --n_GPUs 4 main.py --dataset GOPRO_Large --milestones 500 750 900 --endEpoch 1000 --save_results part
@@ -105,6 +122,12 @@ python launch.py --n_GPUs 4 main.py --dataset REDS --milestones 100 150 180 --en
 python launch.py --n_GPUs 4 main.py --dataset REDS --milestones 100 150 180 --endEpoch 200 --save_results all --do_test false --do_validate false
 ```
 
+```bash
+# Commands used to generate the below results
+python launch.py --n_GPUs 2 main.py --dataset GOPRO_Large --milestones 500 750 900 --endEpoch 1000
+python launch.py --n_GPUs 4 main.py --dataset REDS --milestones 100 150 180 --endEpoch 200 --do_test false
+```
+
 For more advanced usage, please take a look at src/option.py
 
 ## Results
@@ -112,34 +135,52 @@ For more advanced usage, please take a look at src/option.py
 * Single-precision training results
 
 Dataset | GOPRO_Large | REDS
--- | -- | --
+:--:|:--:|:--:
 PSNR | 30.40 | 32.89
 SSIM | 0.9018 | 0.9207
 Download | [link](https://drive.google.com/file/d/1-wGC6s2D2ba-PSV60AeHf48HtYd9JkQ4/view?usp=sharing) | [link](https://drive.google.com/file/d/1aSPgVsNcPNqeGPn0Y2uGmgIwaIn5Njkv/view?usp=sharing)
 
-<!-- * Mixed-precision training results
+* Mixed-precision training results
 
 Dataset | GOPRO_Large | REDS
-PSNR| -- | --
-SSIM| -- | --
-Model download | -- | --
+:--:|:--:|:--:
+PSNR| 30.42 | 32.95
+SSIM| 0.9021 | 0.9209
+Download | [link](https://drive.google.com/file/d/1TgiiiB-4lwWIIy8c-oSSkIy5g4GvDBKB/view?usp=sharing) | [link](https://drive.google.com/file/d/10hH5vtfGUUpy8jLvIBRCBqRoEhWRO1va/view?usp=sharing)
 
 Mixed-precision training uses less memory and is faster, especially on NVIDIA Turing-generation GPUs.
 Loss scaling technique is adopted to cope with the narrow representation range of fp16.
-This could improve/degrade accuracy. -->
+This could improve/degrade accuracy.
+
+* Inference speed on RTX 2080 Ti (resolution: 1280x720)
+
+Inference in half precision has negligible effect on accuracy while it requires less memory and computation time.
+type | FP32 | FP16
+:--:|:--:|:--:
+fps | 1.06 | 3.03
+time (s) | 0.943 | 0.330
 
 ## Demo
 
 To use the trained models, download files, unzip, and put them under DeepDeblur-PyTorch/experiment
 * [GOPRO_L1](https://drive.google.com/file/d/1AfZhyUXEA8_UdZco9EdtpWjTBAb8BbWv/view?usp=sharing)
 * [REDS_L1](https://drive.google.com/file/d/1UwFNXnGBz2rCBxhvq2gKt9Uhj5FeEsa4/view?usp=sharing)
-<!-- * [GOPRO_L1_amp](GOPRO_LINK) -->
-<!-- * [REDS_L1_amp](REDS_LINK) -->
+* [GOPRO_L1_amp](https://drive.google.com/file/d/1ZcP3l2ZXj-C6yrDge5d3UxcaAKRN725w/view?usp=sharing)
+* [REDS_L1_amp](https://drive.google.com/file/d/1do_HOjVFj2AYTX4BbwQ0enELRWtzhW6F/view?usp=sharing)
 
 ```bash
-python main.py --precision half --save_dir SAVE_DIR --demo true --demo_input_dir INPUT_DIR_NAME --demo_output_dir OUTPUT_DIR_NAME
+python main.py --save_dir SAVE_DIR --demo true --demo_input_dir INPUT_DIR_NAME --demo_output_dir OUTPUT_DIR_NAME
 # demo_output_dir is by default SAVE_DIR/results
 # SAVE_DIR is relative to DeepDeblur-PyTorch/experiment
+# DEMO_INPUT_DIR and DEMO_OUTPUT_DIR can be both absolute or relative to os.getenv("HOME")
+# image dataloader looks into DEMO_INPUT_DIR, recursively
+
+# example
+# single GPU
+python main.py --save_dir REDS_L1 --demo true --demo_input_dir Research/dataset/REDS/test/test_blur
+# multi-GPU
+python launch.py --n_GPUs 2 main.py --save_dir REDS_L1 --demo true --demo_input_dir Research/dataset/REDS/test/test_blur --demo_output_dir OUTPUT_DIR_NAME
+
 ```
 
 ## Differences from the original code
@@ -150,3 +191,15 @@ The default options are different from the original paper.
 * Batch size increased to 16.
 * Distributed multi-gpu training is recommended.
 * Mixed-precision training enabled. Accuracy not guaranteed.
+* SSIM function changed from MATLAB to python
+
+## SSIM issue
+
+There are many different SSIM implementations.  
+In this repository, SSIM metric is based on the following function:
+```python
+from skimage.metrics import structural_similarity
+ssim = structural_similarity(ref_im, res_im, multichannel=True, gaussian_weights=True, use_sample_covariance=False)
+```
+`SSIM` class in [src/loss/metric.py](src/loss/metric.py) supports PyTorch.  
+SSIM function in MATLAB is not correct for RGB images. See [this issue](https://github.com/SeungjunNah/DeepDeblur_release/issues/51) for details.

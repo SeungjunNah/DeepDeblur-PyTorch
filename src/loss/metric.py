@@ -32,6 +32,7 @@ class SSIM(nn.Module):
         super(SSIM, self).__init__()
 
         self.device_type = device_type
+        self.dtype = dtype      # SSIM in half precision could be inaccurate
 
         def _get_ssim_weight():
             truncate = 3.5
@@ -47,15 +48,15 @@ class SSIM(nn.Module):
 
             return weight
 
-        self.weight = _get_ssim_weight().to(self.device_type, dtype=dtype, non_blocking=True)
+        self.weight = _get_ssim_weight().to(self.device_type, dtype=self.dtype, non_blocking=True)
 
     def forward(self, im1, im2, data_range=None):
         """Implementation adopted from skimage.metrics.structural_similarity
         Default arguments set to multichannel=True, gaussian_weight=True, use_sample_covariance=False
         """
 
-        im1 = im1.to(self.device_type, non_blocking=True)
-        im2 = im2.to(self.device_type, non_blocking=True)
+        im1 = im1.to(self.device_type, dtype=self.dtype, non_blocking=True)
+        im2 = im2.to(self.device_type, dtype=self.dtype, non_blocking=True)
 
         K1 = 0.01
         K2 = 0.03
@@ -78,14 +79,9 @@ class SSIM(nn.Module):
         if data_range is None:
             data_range = 255 if im1.max() > 1 else 1
 
-        if data_range == 255:
-            im1.div_(data_range)
-            im2.div_(data_range)
-            data_range = 1
-
         def filter_func(img):   # no padding
-            return nn.functional.conv2d(img, self.weight, groups=nch)
-            # return torch.conv2d(img, self.weight, groups=nch)
+            return nn.functional.conv2d(img, self.weight, groups=nch).to(self.dtype)
+            # return torch.conv2d(img, self.weight, groups=nch).to(self.dtype)
 
         # compute (weighted) means
         ux = filter_func(im1)
