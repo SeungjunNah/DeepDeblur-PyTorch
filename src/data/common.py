@@ -9,7 +9,6 @@ def _apply(func, x):
 
     if isinstance(x, list) or isinstance(x, tuple):
         return [_apply(func, x_i) for x_i in x]
-        # return list(map(lambda x_i: _apply(func, x_i), x))
     elif isinstance(x, dict):
         y = {}
         for key, value in x.items():
@@ -90,6 +89,51 @@ def augment(*args, hflip=True, rot=True, shuffle=True, change_saturation=True, r
         return img.astype(np.float32)
 
     return _apply(_augment, args)
+
+def pad(img, divisor=4, pad_width=None, negative=False):
+
+    def _pad_numpy(img, divisor=4, pad_width=None, negative=False):
+        if pad_width is None:
+            (h, w, _) = img.shape
+            pad_h = -h % divisor
+            pad_w = -w % divisor
+            pad_width = ((0, pad_h), (0, pad_w), (0, 0))
+
+        img = np.pad(img, pad_width, mode='edge')
+
+        return img, pad_width
+
+    def _pad_tensor(img, divisor=4, pad_width=None, negative=False):
+
+        n, c, h, w = img.shape
+        if pad_width is None:
+            pad_h = -h % divisor
+            pad_w = -w % divisor
+            pad_width = (0, pad_w, 0, pad_h)
+        else:
+            try:
+                pad_h = pad_width[0][1]
+                pad_w = pad_width[1][1]
+                if isinstance(pad_h, torch.Tensor):
+                    pad_h = pad_h.item()
+                if isinstance(pad_w, torch.Tensor):
+                    pad_w = pad_w.item()
+                
+                pad_width = (0, pad_w, 0, pad_h)
+            except:
+                pass
+        
+            if negative:
+                pad_width = [-val for val in pad_width]
+
+        img = torch.nn.functional.pad(img, pad_width, 'reflect')
+        
+        return img, pad_width
+
+    if isinstance(img, np.ndarray):
+        return _pad_numpy(img, divisor, pad_width, negative)
+    else:   # torch.Tensor
+        return _pad_tensor(img, divisor, pad_width, negative)
 
 def generate_pyramid(*args, n_scales):
 

@@ -17,7 +17,7 @@ class GOPRO_Large(Dataset):
         # self.sharp_key = 'sharp'
 
     def __getitem__(self, idx):
-        blur, sharp, idx, relpath = super(GOPRO_Large, self).__getitem__(idx)
+        blur, sharp, pad_width, idx, relpath = super(GOPRO_Large, self).__getitem__(idx)
         relpath = relpath.replace('{}/'.format(self.blur_key), '')
 
-        return blur, sharp, idx, relpath
+        return blur, sharp, pad_width, idx, relpath

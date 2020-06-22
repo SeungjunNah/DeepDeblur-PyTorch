@@ -55,8 +55,8 @@ class Dataset(data.Dataset):
         return
 
     def set_keys(self):
-        self.blur_key = 'blur'      # to be overridden by child class
-        self.sharp_key = 'sharp'    # to be overridden by child class
+        self.blur_key = 'blur'      # to be overwritten by child class
+        self.sharp_key = 'sharp'    # to be overwritten by child class
 
         self.non_blur_keys = []
         self.non_sharp_keys = []
@@ -118,6 +118,8 @@ class Dataset(data.Dataset):
             if self.args.augment:
                 imgs = common.augment(*imgs, hflip=True, rot=True, shuffle=True, change_saturation=True, rgb_range=self.args.rgb_range)
                 imgs[0] = common.add_noise(imgs[0], sigma_sigma=2, rgb_range=self.args.rgb_range)
+        elif self.mode == 'demo':
+            imgs[0], pad_width = common.pad(imgs[0], divisor=2**(self.args.n_scales-1))   # pad in case of non-divisible size
         else:
             pass    # deliver test image as is.
 
@@ -130,7 +132,7 @@ class Dataset(data.Dataset):
         blur = imgs[0]
         sharp = imgs[1] if len(imgs) > 1 else False
 
-        return blur, sharp, idx, relpath
+        return blur, sharp, pad_width, idx, relpath
 
     def __len__(self):
         return len(self.blur_list)

@@ -58,7 +58,7 @@ group_model.add_argument('--downsample', type=str, choices=('Gaussian', 'bicubic
 group_model.add_argument('--precision', type=str, default='single', choices=('single', 'half'), help='FP precision for test(single | half)')
 
 # amp
-group_amp = parser.add_argument_group('Model specs')
+group_amp = parser.add_argument_group('AMP specs')
 group_amp.add_argument('--amp', type=str2bool, default=False, help='use automatic mixed precision training')
 group_amp.add_argument('--opt_level', type=str, default='O1', help='mixed precision optimization level')
 group_amp.add_argument('--loss_scale', type=str, default='dynamic', help='loss scaling to prevent gradient over/underflow. dynamic by default. Could be constant ex) 1, 32, 1024')
@@ -107,7 +107,7 @@ group_loss.add_argument('--metric', type=str, default='PSNR,SSIM', help='metric 
 # Logging
 group_log = parser.add_argument_group('Logging specs')
 group_log.add_argument('--save_dir', type=str, default='', help='subdirectory to save experiment logs')
-# group_log.add_argument('--load_dir', type=str, default='.', help='subdirectory to load experiment logs')
+# group_log.add_argument('--load_dir', type=str, default='', help='subdirectory to load experiment logs')
 group_log.add_argument('--startEpoch', type=int, default=-1, help='(re)starting epoch number')
 group_log.add_argument('--endEpoch', type=int, default=1000, help='ending epoch number')
 group_log.add_argument('--loadEpoch', type=int, default=-1, help='epoch number to load model (startEpoch-1 for training, startEpoch for testing)')
@@ -140,7 +140,6 @@ if args.startEpoch < 0: # start from scratch or continue from the last epoch
                 lastEpoch = epochNumber
 
         args.startEpoch = lastEpoch + 1
-
     else:
         # train from scratch
         args.startEpoch = 1
@@ -209,14 +208,15 @@ if args.seed < 0:
     args.seed = int(time.time())
 
 # save arguments
-torch.save(args, argname)
-with open(argname_txt, 'a') as file:
-    file.write('execution at {}\n'.format(now))
+if args.rank == 0:
+    torch.save(args, argname)
+    with open(argname_txt, 'a') as file:
+        file.write('execution at {}\n'.format(now))
 
-    for key in args.__dict__:
-        file.write(key + ': ' + str(args.__dict__[key]) + '\n')
+        for key in args.__dict__:
+            file.write(key + ': ' + str(args.__dict__[key]) + '\n')
 
-    file.write('\n')
+        file.write('\n')
 
 # device and type
 cuda = args.device_type == 'cuda'

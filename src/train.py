@@ -44,14 +44,12 @@ class Trainer():
 
         self.is_slave = self.args.launched and self.args.rank != 0
 
-        # self.load(args.startEpoch-1)
-
     def save(self, epoch=None):
         epoch = self.epoch if epoch is None else epoch
         if epoch % self.args.save_every == 0:
             if self.mode == 'train':
                 self.model.save(epoch)
-                self.optimizer.save()
+                self.optimizer.save(epoch)
             self.criterion.save()
 
         return
@@ -146,6 +144,10 @@ class Trainer():
             input, target = data.common.to(
                 batch[0], batch[1], device=self.device, dtype=self.dtype_eval)
             output = self.model(input)
+
+            if mode == 'demo':  # remove padded part
+                pad_width = batch[2]
+                output[0], _ = data.common.pad(output[0], pad_width=pad_width, negative=True)
 
             if isinstance(batch[1], torch.BoolTensor):
                 compute_loss = False

@@ -17,6 +17,6 @@ class Demo(Dataset):
         self.non_sharp_keys = ['']      # no files
 
     def __getitem__(self, idx):
-        blur, sharp, idx, relpath = super(Demo, self).__getitem__(idx)
+        blur, sharp, pad_width, idx, relpath = super(Demo, self).__getitem__(idx)
 
-        return blur, sharp, idx, relpath
+        return blur, sharp, pad_width, idx, relpath

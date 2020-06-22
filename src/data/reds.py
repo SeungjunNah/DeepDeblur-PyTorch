@@ -21,9 +21,8 @@ class REDS(Dataset):
         self.non_sharp_keys = ['sharp_bicubic', 'sharp']
         self.non_sharp_keys.remove(self.sharp_key)
 
-
     def __getitem__(self, idx):
-        blur, sharp, idx, relpath = super(REDS, self).__getitem__(idx)
+        blur, sharp, pad_width, idx, relpath = super(REDS, self).__getitem__(idx)
         relpath = relpath.replace('{}/{}/'.format(self.mode, self.blur_key), '')
 
-        return blur, sharp, idx, relpath
+        return blur, sharp, pad_width, idx, relpath
