@@ -113,6 +113,7 @@ class Dataset(data.Dataset):
         else:
             imgs = [blur]
 
+        pad_width = 0   # dummy value
         if self.mode == 'train':
             imgs = common.crop(*imgs, ps=self.args.patch_size)
             if self.args.augment:
