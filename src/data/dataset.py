@@ -124,7 +124,7 @@ class Dataset(data.Dataset):
         else:
             pass    # deliver test image as is.
 
-        if self.args.gaussain_pyramid:
+        if self.args.gaussian_pyramid:
             imgs = common.generate_pyramid(*imgs, n_scales=self.args.n_scales)
 
         imgs = common.np2tensor(*imgs)
