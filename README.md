@@ -26,7 +26,7 @@ Original Torch7 implementaion is available [here](https://github.com/SeungjunNah
 * PyTorch 1.5
 * tqdm
 * imageio
-* scikit-image
+* scikit-image 0.16.2
 * numpy
 * matplotlib
 * readline
