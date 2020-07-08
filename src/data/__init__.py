@@ -5,6 +5,7 @@ from importlib import import_module
 from torch.utils.data import DataLoader
 from torch.utils.data import SequentialSampler, RandomSampler
 from torch.utils.data.distributed import DistributedSampler
+from .sampler import DistributedEvalSampler
 
 class Data():
     def __init__(self, args):
@@ -46,7 +47,7 @@ class Data():
             elif mode in ('val', 'test', 'demo'):
                 if args.distributed:
                     batch_size = 1  # 1 image per GPU
-                    sampler = DistributedSampler(dataset, shuffle=False, num_replicas=args.world_size, rank=args.rank)
+                    sampler = DistributedEvalSampler(dataset, shuffle=False, num_replicas=args.world_size, rank=args.rank)
                     num_workers = int((args.num_workers + args.n_GPUs - 1) / args.n_GPUs)    # num_workers per GPU (single-node training)
                 else:
                     batch_size = args.n_GPUs    # 1 image per GPU

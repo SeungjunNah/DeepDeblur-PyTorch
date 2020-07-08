@@ -33,8 +33,7 @@ class Model(nn.Module):
             self.model.D = None
 
         self.to(args.device, dtype=args.dtype, non_blocking=True)
-
-        self.load(args.loadEpoch)
+        self.load(args.loadEpoch, path=args.pretrained)
 
     def parallelize(self):
         if self.args.distributed:
@@ -83,7 +82,9 @@ class Model(nn.Module):
         torch.save(self.state_dict(), self._save_path(epoch))
 
     def load(self, epoch=None, path=None):
-        if isinstance(epoch, int):
+        if path:
+            model_name = path
+        elif isinstance(epoch, int):
             if epoch < 0:
                 epoch = self.get_last_epoch()
             if epoch == 0:   # epoch 0
@@ -94,8 +95,6 @@ class Model(nn.Module):
                 return  # leave model as initialized
 
             model_name = self._save_path(epoch)
-        elif path is not None:
-            model_name = path
         else:
             raise Exception('no epoch number or model path specified!')
 

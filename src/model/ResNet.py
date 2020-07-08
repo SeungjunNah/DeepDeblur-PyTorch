@@ -6,19 +6,19 @@ def build_model(args):
     return ResNet(args)
 
 class ResNet(nn.Module):
-    def __init__(self, args, in_channels=None, out_channels=None, n_feats=None, kernel_size=None, n_resblocks=None):
+    def __init__(self, args, in_channels=3, out_channels=3, n_feats=None, kernel_size=None, n_resblocks=None, mean_shift=True):
         super(ResNet, self).__init__()
 
-        self.in_channels = in_channels if isinstance(in_channels, int) else args.in_channels
-        self.out_channels = out_channels if isinstance(out_channels, int) else args.out_channels
-        self.n_feats = n_feats if isinstance(n_feats, int) else args.n_feats
-        self.kernel_size = kernel_size if isinstance(kernel_size, int) else args.kernel_size
-        self.n_resblocks = n_resblocks if isinstance(n_resblocks, int) else args.n_resblocks
+        self.in_channels = in_channels
+        self.out_channels = out_channels
 
+        self.n_feats = args.n_feats if n_feats is None else n_feats
+        self.kernel_size = args.kernel_size if kernel_size is None else kernel_size
+        self.n_resblocks = args.n_resblocks if n_resblocks is None else n_resblocks
 
-        # n_resblock = args.n_resblocks
-        # n_feat = args.n_feats
-        # kernel_size = args.kernel_size
+        self.mean_shift = mean_shift
+        self.rgb_range = args.rgb_range
+        self.mean = self.rgb_range / 2
 
         modules = []
         modules.append(common.default_conv(self.in_channels, self.n_feats, self.kernel_size))
@@ -28,12 +28,14 @@ class ResNet(nn.Module):
 
         self.body = nn.Sequential(*modules)
 
-    def forward(self, x):
-        # x -= 0.5
-        # x = self.body(x)
-        # x += 0.5
+    def forward(self, input):
+        if self.mean_shift:
+            input = input - self.mean
 
-        # return x
+        output = self.body(input)
 
-        return self.body(x)
+        if self.mean_shift:
+            output = output + self.mean
+
+        return output
 

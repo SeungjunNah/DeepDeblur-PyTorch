@@ -36,11 +36,10 @@ class MSResNet(nn.Module):
         self.n_scales = args.n_scales
 
         self.body_models = nn.ModuleList([
-            ResNet(args, 3, 3),
+            ResNet(args, 3, 3, mean_shift=False),
         ])
         for _ in range(1, self.n_scales):
-            # self.body_models += [ResNet(args, 6, 3)]
-            self.body_models.insert(0, ResNet(args, 6, 3))
+            self.body_models.insert(0, ResNet(args, 6, 3, mean_shift=False))
 
         self.conv_end_models = nn.ModuleList([None])
         for _ in range(1, self.n_scales):

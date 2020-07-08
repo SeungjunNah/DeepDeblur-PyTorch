@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser(description='Dynamic Scene Deblurring')
 # Device specifications
 group_device = parser.add_argument_group('Device specs')
 group_device.add_argument('--seed', type=int, default=-1, help='random seed')
-group_device.add_argument('--num_workers', type=int, default=6, help='the number of dataloader workers')
+group_device.add_argument('--num_workers', type=int, default=7, help='the number of dataloader workers')
 group_device.add_argument('--device_type', type=str, choices=('cpu', 'cuda'), default='cuda', help='device to run models')
 group_device.add_argument('--device_index', type=int, default=0, help='device id to run models')
 group_device.add_argument('--n_GPUs', type=int, default=1, help='the number of GPUs for training')
@@ -47,7 +47,7 @@ group_data.add_argument('--rgb_range', type=int, default=255, help='RGB pixel va
 # Model
 group_model = parser.add_argument_group('Model specs')
 group_model.add_argument('--model', type=str, default='MSResNet', help='model architecture')
-group_model.add_argument('--pre_trained', type=str, default='.', help='pre_trained model location')
+group_model.add_argument('--pretrained', type=str, default='', help='pretrained model location')
 group_model.add_argument('--n_scales', type=int, default=3, help='multi-scale deblurring level')
 group_model.add_argument('--gaussian_pyramid', type=str2bool, default=True, help='gaussian pyramid input/target')
 group_model.add_argument('--n_resblocks', type=int, default=19, help='number of residual blocks per scale')
@@ -153,6 +153,16 @@ elif args.startEpoch == 0:
 if args.loadEpoch < 0:  # loadEpoch == startEpoch when doing a post-training test for a specific epoch
     args.loadEpoch = args.startEpoch - 1
 
+if args.pretrained != '':
+    if args.startEpoch <= 1:
+        args.pretrained = os.path.join('../experiment', args.pretrained)
+    else:
+        print('starting from epoch {}! ignoring pretrained model path..'.format(args.startEpoch))
+        args.pretrained = ''
+
+if args.model == 'MSResNet':
+    args.gaussian_pyramid = True
+
 argname = os.path.join(args.save_dir, 'args.pt')
 argname_txt = os.path.join(args.save_dir, 'args.txt')
 if args.startEpoch > 1:
@@ -184,6 +194,9 @@ if args.dataset is not None:
 if args.data_val is None:
     args.do_validate = False
 
+if args.demo_input_dir:
+    args.demo = True
+
 if args.demo:
     args.data_train = ''
     args.data_val = ''
@@ -196,8 +209,9 @@ if args.demo:
     if args.demo_input_dir.find('/') != 0 and args.demo_input_dir.find('./') != 0:
         args.demo_input_dir = os.path.join(str(os.getenv("HOME")), args.demo_input_dir)
 
-    if args.demo_output_dir.find('/') != 0 and args.demo_output_dir.find('./') != 0:
-        args.demo_output_dir = os.path.join(str(os.getenv("HOME")), args.demo_output_dir)
+    if args.demo_output_dir:
+        if args.demo_output_dir.find('/') != 0 and args.demo_output_dir.find('./') != 0:
+            args.demo_output_dir = os.path.join(str(os.getenv("HOME")), args.demo_output_dir)
 
     args.save_results = 'all'
 
