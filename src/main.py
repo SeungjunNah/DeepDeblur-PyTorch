@@ -14,10 +14,8 @@ def main_worker(rank, args):
 
     loaders = Data(args).get_loader()
     model = Model(args)
-    optimizer = Optimizer(args, model)
-    if args.amp:
-        model = optimizer.set_amp(model)
     model.parallelize()
+    optimizer = Optimizer(args, model)
 
     criterion = Loss(args, model=model, optimizer=optimizer)
 

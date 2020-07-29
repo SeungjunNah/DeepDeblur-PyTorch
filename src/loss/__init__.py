@@ -180,6 +180,7 @@ class Loss(torch.nn.modules.loss._Loss):
         else:   # Tensor
             count = input.shape[0]  # batch size
 
+        isnan = False
         for loss_type in self.loss_types:
 
             if loss_type == 'ADV':
@@ -187,12 +188,16 @@ class Loss(torch.nn.modules.loss._Loss):
             else:
                 _loss = _ms_forward(input, target, self.loss[loss_type]) * self.weight[loss_type]
 
-            self.loss_stat[self.mode][loss_type][self.epoch] += _loss.item() * count
-            self.loss_stat[self.mode]['Total'][self.epoch] += _loss.item() * count
+            if torch.isnan(_loss):
+                isnan = True    # skip recording (will also be skipped at backprop)
+            else:
+                self.loss_stat[self.mode][loss_type][self.epoch] += _loss.item() * count
+                self.loss_stat[self.mode]['Total'][self.epoch] += _loss.item() * count
 
             loss += _loss
 
-        self.count += count
+        if not isnan:
+            self.count += count
 
         if not self.training and self.do_measure:
             self.measure(input, target)

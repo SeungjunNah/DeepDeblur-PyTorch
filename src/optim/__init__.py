@@ -8,11 +8,6 @@ from collections import Counter
 from model import Model
 from utils import interact, Map
 
-try:
-    from apex import amp
-except:
-    pass
-
 class Optimizer(object):
     def __init__(self, args, model):
         self.args = args
@@ -152,50 +147,6 @@ class Optimizer(object):
 
         self.load(args.loadEpoch)
 
-    def _amp_name(self):
-        return os.path.join(self.args.save_dir, 'amp.pt')
-
-    def save_amp(self):
-        if self.args.amp:
-            torch.save(amp.state_dict(), self._amp_name())
-
-    def load_amp(self):
-        if self.args.amp:
-
-            try:
-                amp.load_state_dict(torch.load(self._amp_name()))
-            except:
-                print('No amp record found!')
-
-    def set_amp(self, model):
-        if not self.args.amp:
-            return model
-
-        print('initializing amp')
-
-        kwargs_amp = {
-            'opt_level': self.args.opt_level,
-            'loss_scale': self.args.loss_scale,
-            'max_loss_scale': self.args.max_loss_scale,
-        }
-
-        if model.model.D is None:
-            model, self.G = amp.initialize(
-                model, self.G, **kwargs_amp)
-        else:
-            model, [self.G, self.D] = amp.initialize(
-                model, [self.G, self.D], **kwargs_amp)
-
-        self.load_amp()
-
-        self.G._register_scheduler(self.scheduler_class, self.kwargs_scheduler)
-        if self.D is not None:
-            self.D._register_scheduler(self.scheduler_class, self.kwargs_scheduler)
-
-        self.load(self.args.loadEpoch, load_amp=False)   # this is correct
-
-        return model
-
     def zero_grad(self):
         self.G.zero_grad()
 
@@ -241,16 +192,10 @@ class Optimizer(object):
             epoch = self.G.scheduler.last_epoch
         torch.save(self.state_dict(), self._save_path(epoch))
 
-        if self.args.amp:
-            self.save_amp()
-
-    def load(self, epoch, load_amp=False):
+    def load(self, epoch):
         if epoch > 0:
             print('Loading optimizer from {}'.format(self._save_path(epoch)))
             self.load_state_dict(torch.load(self._save_path(epoch), map_location=self.args.device), epoch=epoch)
-
-            if load_amp:
-                self.load_amp()
 
         elif epoch == 0:
             pass

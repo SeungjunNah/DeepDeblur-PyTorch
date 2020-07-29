@@ -14,6 +14,8 @@ import torch.backends.cudnn as cudnn
 from utils import interact
 from utils import str2bool, int2str
 
+import template
+
 # Training settings
 parser = argparse.ArgumentParser(description='Dynamic Scene Deblurring')
 
@@ -60,9 +62,7 @@ group_model.add_argument('--precision', type=str, default='single', choices=('si
 # amp
 group_amp = parser.add_argument_group('AMP specs')
 group_amp.add_argument('--amp', type=str2bool, default=False, help='use automatic mixed precision training')
-group_amp.add_argument('--opt_level', type=str, default='O1', help='mixed precision optimization level')
-group_amp.add_argument('--loss_scale', type=str, default='dynamic', help='loss scaling to prevent gradient over/underflow. dynamic by default. Could be constant ex) 1, 32, 1024')
-group_amp.add_argument('--max_loss_scale', type=float, default=1024, help='dynamic loss scaling maximum.')
+group_amp.add_argument('--init_scale', type=float, default=1024., help='initial loss scale')
 
 # Training
 group_train = parser.add_argument_group('Training specs')
@@ -118,7 +118,10 @@ group_log.add_argument('--save_results', type=str, default='part', choices=('non
 group_debug = parser.add_argument_group('Debug specs')
 group_debug.add_argument('--stay', type=str2bool, default=False, help='stay at interactive console after trainer initialization')
 
+parser.add_argument('--template', type=str, default='', help='argument template option')
+
 args = parser.parse_args()
+template.set_template(args)
 
 args.data_root = os.path.expanduser(args.data_root)   # recognize home directory
 now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
@@ -153,7 +156,7 @@ elif args.startEpoch == 0:
 if args.loadEpoch < 0:  # loadEpoch == startEpoch when doing a post-training test for a specific epoch
     args.loadEpoch = args.startEpoch - 1
 
-if args.pretrained != '':
+if args.pretrained:
     if args.startEpoch <= 1:
         args.pretrained = os.path.join('../experiment', args.pretrained)
     else:
@@ -206,11 +209,11 @@ if args.demo:
     args.do_validate = False
     args.do_test = False
 
-    if args.demo_input_dir.find('/') != 0 and args.demo_input_dir.find('./') != 0:
+    if args.demo_input_dir.find('/') != 0 and args.demo_input_dir.find('.') != 0:
         args.demo_input_dir = os.path.join(str(os.getenv("HOME")), args.demo_input_dir)
 
     if args.demo_output_dir:
-        if args.demo_output_dir.find('/') != 0 and args.demo_output_dir.find('./') != 0:
+        if args.demo_output_dir.find('/') != 0 and args.demo_output_dir.find('.') != 0:
             args.demo_output_dir = os.path.join(str(os.getenv("HOME")), args.demo_output_dir)
 
     args.save_results = 'all'

@@ -6,10 +6,7 @@ import torch
 import data.common
 from utils import interact, MultiSaver
 
-try:
-    from apex import amp
-except:
-    pass
+import torch.cuda.amp as amp
 
 class Trainer():
 
@@ -33,7 +30,7 @@ class Trainer():
         self.dtype = args.dtype
         self.dtype_eval = torch.float32 if args.precision == 'single' else torch.float16
 
-        if self.args.demo and self.args.demo_output_dir != '':
+        if self.args.demo and self.args.demo_output_dir:
             self.result_dir = self.args.demo_output_dir
         else:
             self.result_dir = os.path.join(self.save_dir, 'result')
@@ -43,6 +40,11 @@ class Trainer():
         self.imsaver = MultiSaver(self.result_dir)
 
         self.is_slave = self.args.launched and self.args.rank != 0
+
+        self.scaler = amp.GradScaler(
+            init_scale=self.args.init_scale,
+            enabled=self.args.amp
+        )
 
     def save(self, epoch=None):
         epoch = self.epoch if epoch is None else epoch
@@ -58,7 +60,7 @@ class Trainer():
         if epoch is None:
             epoch = self.args.loadEpoch
         self.model.load(epoch, pretrained)
-        self.optimizer.load(epoch, load_amp=self.args.amp)
+        self.optimizer.load(epoch)
         self.criterion.load(epoch)
 
         return
@@ -91,16 +93,14 @@ class Trainer():
 
             input, target = data.common.to(
                 batch[0], batch[1], device=self.device, dtype=self.dtype)
-            output = self.model(input)
 
-            loss = self.criterion(output, target)
-            if self.args.amp:
-                with amp.scale_loss(loss, self.optimizer.G) as scaled_loss:
-                    scaled_loss.backward()
-            else:
-                loss.backward()
+            with amp.autocast(self.args.amp):
+                output = self.model(input)
+                loss = self.criterion(output, target)
 
-            self.optimizer.step()
+            self.scaler.scale(loss).backward()
+            self.scaler.step(self.optimizer.G)
+            self.scaler.update()
 
             if isinstance(tq, tqdm):
                 tq.set_description(self.criterion.get_loss_desc())
@@ -143,7 +143,8 @@ class Trainer():
         for idx, batch in enumerate(tq):
             input, target = data.common.to(
                 batch[0], batch[1], device=self.device, dtype=self.dtype_eval)
-            output = self.model(input)
+            with amp.autocast(self.args.amp):
+                output = self.model(input)
 
             if mode == 'demo':  # remove padded part
                 pad_width = batch[2]

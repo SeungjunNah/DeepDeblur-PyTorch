@@ -3,10 +3,7 @@ import torch.nn as nn
 
 from utils import interact
 
-try:
-    from apex import amp
-except:
-    pass
+import torch.cuda.amp as amp
 
 class Adversarial(nn.modules.loss._Loss):
     # pure loss function without saving & loading option
@@ -16,6 +13,10 @@ class Adversarial(nn.modules.loss._Loss):
         self.args = args
         self.model = model.model
         self.optimizer = optimizer
+        self.scaler = amp.GradScaler(
+            init_scale=self.args.init_scale,
+            enabled=self.args.amp
+        )
 
         self.gan_k = 1
 
@@ -28,20 +29,18 @@ class Adversarial(nn.modules.loss._Loss):
             for _ in range(self.gan_k):
                 self.optimizer.D.zero_grad()
                 # d: B x 1 tensor
-                d_fake = self.model.D(fake_detach)
-                d_real = self.model.D(real)
+                with amp.autocast(self.args.amp):
+                    d_fake = self.model.D(fake_detach)
+                    d_real = self.model.D(real)
 
-                label_fake = torch.zeros_like(d_fake)
-                label_real = torch.ones_like(d_real)
+                    label_fake = torch.zeros_like(d_fake)
+                    label_real = torch.ones_like(d_real)
 
-                loss_d = self.BCELoss(d_fake, label_fake) + self.BCELoss(d_real, label_real)
-                if self.args.amp:
-                    with amp.scale_loss(loss_d, self.optimizer.D) as scaled_loss_d:
-                        scaled_loss_d.backward(retain_graph=False)
-                else:
-                    loss_d.backward(retain_graph=False)
+                    loss_d = self.BCELoss(d_fake, label_fake) + self.BCELoss(d_real, label_real)
 
-                self.optimizer.D.step()
+                self.scaler.scale(loss_d).backward(retain_graph=False)
+                self.scaler.step(self.optimizer.D)
+                self.scaler.update()
         else:
             d_real = self.model.D(real)
             label_real = torch.ones_like(d_real)

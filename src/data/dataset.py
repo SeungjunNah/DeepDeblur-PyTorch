@@ -75,6 +75,7 @@ class Dataset(data.Dataset):
             self.non_sharp_keys.remove(self.sharp_key)
 
         def _key_check(path, true_key, false_keys):
+            path = os.path.join(path, '')
             if path.find(true_key) >= 0:
                 for false_key in false_keys:
                     if path.find(false_key) >= 0:
@@ -95,6 +96,14 @@ class Dataset(data.Dataset):
             data_list.sort()
 
             return data_list
+
+        def _rectify_keys():
+            self.blur_key = os.path.join(self.blur_key, '')
+            self.non_blur_keys = [os.path.join(non_blur_key, '') for non_blur_key in self.non_blur_keys]
+            self.sharp_key = os.path.join(self.sharp_key, '')
+            self.non_sharp_keys = [os.path.join(non_sharp_key, '') for non_sharp_key in self.non_sharp_keys]
+
+        _rectify_keys()
 
         self.blur_list = _get_list_by_key(root, self.blur_key, self.non_blur_keys)
         self.sharp_list = _get_list_by_key(root, self.sharp_key, self.non_sharp_keys)
