@@ -23,21 +23,15 @@ Original Torch7 implementaion is available [here](https://github.com/SeungjunNah
 ## Dependencies
 
 * python 3 (tested with anaconda3)
-* PyTorch 1.5
+* PyTorch 1.6
 * tqdm
 * imageio
 * scikit-image 0.16.2
 * numpy
 * matplotlib
 * readline
-* (optional) [Apex](https://github.com/NVIDIA/apex) 0.1 (CUDA version should exactly match to PyTorch)
 
-```bash
-git clone https://github.com/NVIDIA/apex
-cd apex
-pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./
-# if the above installation fails, try: python setup.py --cpp_ext
-```
+For mixed-precision training, PyTorch >= 1.6 is required. If you don't need mixed-precision operation, PyTorch 1.5 is enough.
 
 ## Datasets
 
@@ -97,12 +91,12 @@ python launch.py --n_GPUs 2 main.py --batch_size 16 --precision single
 # half precision inference (faster and requires less memory)
 python launch.py --n_GPUs 2 main.py --batch_size 16 --precision half
 
-# half precision inference with AMP (Apex required)
+# half precision inference with AMP
 python launch.py --n_GPUs 2 main.py --batch_size 16 --amp true
 ```
 
 ```bash
-# optional mixed-precision training (Apex required)
+# optional mixed-precision training
 # mixed precision training may result in different accuracy
 python main.py --n_GPUs 1 --batch_size 16 --amp true
 python main.py --n_GPUs 2 --batch_size 16 --amp true
@@ -202,4 +196,4 @@ from skimage.metrics import structural_similarity
 ssim = structural_similarity(ref_im, res_im, multichannel=True, gaussian_weights=True, use_sample_covariance=False)
 ```
 `SSIM` class in [src/loss/metric.py](src/loss/metric.py) supports PyTorch.  
-SSIM function in MATLAB is not correct for RGB images. See [this issue](https://github.com/SeungjunNah/DeepDeblur_release/issues/51) for details.
+SSIM function in MATLAB is not correct if applied to RGB images. See [this issue](https://github.com/SeungjunNah/DeepDeblur_release/issues/51) for details.
