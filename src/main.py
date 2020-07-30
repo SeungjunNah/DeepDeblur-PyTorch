@@ -26,10 +26,10 @@ def main_worker(rank, args):
         exit()
 
     if args.demo:
-        trainer.evaluate(epoch=args.startEpoch, mode='demo')
+        trainer.evaluate(epoch=args.start_epoch, mode='demo')
         exit()
 
-    for epoch in range(1, args.startEpoch):
+    for epoch in range(1, args.start_epoch):
         if args.do_validate:
             if epoch % args.validate_every == 0:
                 trainer.fill_evaluation(epoch, 'val')
@@ -37,7 +37,7 @@ def main_worker(rank, args):
             if epoch % args.test_every == 0:
                 trainer.fill_evaluation(epoch, 'test')
 
-    for epoch in range(args.startEpoch, args.endEpoch+1):
+    for epoch in range(args.start_epoch, args.end_epoch+1):
         if args.do_train:
             trainer.train(epoch)
 

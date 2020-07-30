@@ -108,9 +108,9 @@ group_loss.add_argument('--metric', type=str, default='PSNR,SSIM', help='metric 
 group_log = parser.add_argument_group('Logging specs')
 group_log.add_argument('--save_dir', type=str, default='', help='subdirectory to save experiment logs')
 # group_log.add_argument('--load_dir', type=str, default='', help='subdirectory to load experiment logs')
-group_log.add_argument('--startEpoch', type=int, default=-1, help='(re)starting epoch number')
-group_log.add_argument('--endEpoch', type=int, default=1000, help='ending epoch number')
-group_log.add_argument('--loadEpoch', type=int, default=-1, help='epoch number to load model (startEpoch-1 for training, startEpoch for testing)')
+group_log.add_argument('--start_epoch', type=int, default=-1, help='(re)starting epoch number')
+group_log.add_argument('--end_epoch', type=int, default=1000, help='ending epoch number')
+group_log.add_argument('--load_epoch', type=int, default=-1, help='epoch number to load model (start_epoch-1 for training, start_epoch for testing)')
 group_log.add_argument('--save_every', type=int, default=10, help='save model/optimizer at every N epochs')
 group_log.add_argument('--save_results', type=str, default='part', choices=('none', 'part', 'all'), help='save none/part/all of result images')
 
@@ -130,37 +130,37 @@ if args.save_dir == '':
 args.save_dir = os.path.join('../experiment', args.save_dir)
 os.makedirs(args.save_dir, exist_ok=True)
 
-if args.startEpoch < 0: # start from scratch or continue from the last epoch
+if args.start_epoch < 0: # start from scratch or continue from the last epoch
     # check if there are any models saved before
     model_dir = os.path.join(args.save_dir, 'models')
     model_prefix = 'model-'
     if os.path.exists(model_dir):
         model_list = [name for name in os.listdir(model_dir) if name.startswith(model_prefix)]
-        lastEpoch = 0
+        last_epoch = 0
         for name in model_list:
             epochNumber = int(re.findall('\\d+', name)[0]) # model example name model-100.pt
-            if lastEpoch < epochNumber:
-                lastEpoch = epochNumber
+            if last_epoch < epochNumber:
+                last_epoch = epochNumber
 
-        args.startEpoch = lastEpoch + 1
+        args.start_epoch = last_epoch + 1
     else:
         # train from scratch
-        args.startEpoch = 1
-elif args.startEpoch == 0:
+        args.start_epoch = 1
+elif args.start_epoch == 0:
     # remove existing directory and start over
     if args.rank == 0:  # maybe local rank
         shutil.rmtree(args.save_dir, ignore_errors=True)
     os.makedirs(args.save_dir, exist_ok=True)
-    args.startEpoch = 1
+    args.start_epoch = 1
 
-if args.loadEpoch < 0:  # loadEpoch == startEpoch when doing a post-training test for a specific epoch
-    args.loadEpoch = args.startEpoch - 1
+if args.load_epoch < 0:  # load_epoch == start_epoch when doing a post-training test for a specific epoch
+    args.load_epoch = args.start_epoch - 1
 
 if args.pretrained:
-    if args.startEpoch <= 1:
+    if args.start_epoch <= 1:
         args.pretrained = os.path.join('../experiment', args.pretrained)
     else:
-        print('starting from epoch {}! ignoring pretrained model path..'.format(args.startEpoch))
+        print('starting from epoch {}! ignoring pretrained model path..'.format(args.start_epoch))
         args.pretrained = ''
 
 if args.model == 'MSResNet':
@@ -168,7 +168,7 @@ if args.model == 'MSResNet':
 
 argname = os.path.join(args.save_dir, 'args.pt')
 argname_txt = os.path.join(args.save_dir, 'args.txt')
-if args.startEpoch > 1:
+if args.start_epoch > 1:
     # load previous arguments and keep the necessary ones same
 
     if os.path.exists(argname):

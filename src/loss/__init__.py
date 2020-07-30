@@ -37,7 +37,7 @@ class Loss(torch.nn.modules.loss._Loss):
         self.device_type = args.device_type
         self.synchronized = False
 
-        self.epoch = args.startEpoch if epoch is None else epoch
+        self.epoch = args.start_epoch if epoch is None else epoch
         self.save_dir = args.save_dir
         self.save_name = os.path.join(self.save_dir, 'loss.pt')
 
@@ -103,8 +103,8 @@ class Loss(torch.nn.modules.loss._Loss):
 
         print('Metrics: {}'.format(args.metric))
 
-        if args.startEpoch != 1:
-            self.load(args.startEpoch - 1)
+        if args.start_epoch != 1:
+            self.load(args.start_epoch - 1)
 
         for mode in self.modes:
             for loss_type in self.loss:

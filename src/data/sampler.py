@@ -110,6 +110,6 @@ class DistributedEvalSampler(Sampler):
         sampler will yield the same ordering.
 
         Arguments:
-            epoch (int): Epoch number.
+            epoch (int): _epoch number.
         """
         self.epoch = epoch

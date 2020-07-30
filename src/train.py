@@ -14,7 +14,7 @@ class Trainer():
         print('===> Initializing trainer')
         self.args = args
         self.mode = 'train' # 'val', 'test'
-        self.epoch = args.startEpoch
+        self.epoch = args.start_epoch
         self.save_dir = args.save_dir
 
         self.model = model
@@ -58,7 +58,7 @@ class Trainer():
 
     def load(self, epoch=None, pretrained=None):
         if epoch is None:
-            epoch = self.args.loadEpoch
+            epoch = self.args.load_epoch
         self.model.load(epoch, pretrained)
         self.optimizer.load(epoch)
         self.criterion.load(epoch)
@@ -76,7 +76,7 @@ class Trainer():
         self.criterion.epoch = epoch
 
         if not self.is_slave:
-            print('[Epoch {} / lr {:.2e}]'.format(
+            print('[_epoch {} / lr {:.2e}]'.format(
                 epoch, self.optimizer.get_lr()
             ))
 

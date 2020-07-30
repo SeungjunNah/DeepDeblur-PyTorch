@@ -59,7 +59,7 @@ python main.py --n_GPUs 1 --batch_size 8 --loss 1*L1+0.1*ADV
 # train with GOPRO_Large dataset
 python main.py --n_GPUs 1 --batch_size 8 --dataset GOPRO_Large
 # train with REDS dataset (always set --do_test false)
-python main.py --n_GPUs 1 --batch_size 8 --dataset REDS --do_test false --milestones 100 150 180 --endEpoch 200
+python main.py --n_GPUs 1 --batch_size 8 --dataset REDS --do_test false --milestones 100 150 180 --end_epoch 200
 
 # save part of the evaluation results (default)
 python main.py --n_GPUs 1 --batch_size 8 --dataset GOPRO_Large --save_results part
@@ -107,19 +107,19 @@ python launch.py --n_GPUs 2 main.py --batch_size 16 --amp true
 # Advanced usage examples 
 # using launch.py is recommended for the best speed and convenience
 python launch.py --n_GPUs 4 main.py --dataset GOPRO_Large
-python launch.py --n_GPUs 4 main.py --dataset GOPRO_Large --milestones 500 750 900 --endEpoch 1000 --save_results none
-python launch.py --n_GPUs 4 main.py --dataset GOPRO_Large --milestones 500 750 900 --endEpoch 1000 --save_results part
-python launch.py --n_GPUs 4 main.py --dataset GOPRO_Large --milestones 500 750 900 --endEpoch 1000 --save_results all
-python launch.py --n_GPUs 4 main.py --dataset GOPRO_Large --milestones 500 750 900 --endEpoch 1000 --save_results all --amp true
+python launch.py --n_GPUs 4 main.py --dataset GOPRO_Large --milestones 500 750 900 --end_epoch 1000 --save_results none
+python launch.py --n_GPUs 4 main.py --dataset GOPRO_Large --milestones 500 750 900 --end_epoch 1000 --save_results part
+python launch.py --n_GPUs 4 main.py --dataset GOPRO_Large --milestones 500 750 900 --end_epoch 1000 --save_results all
+python launch.py --n_GPUs 4 main.py --dataset GOPRO_Large --milestones 500 750 900 --end_epoch 1000 --save_results all --amp true
 
-python launch.py --n_GPUs 4 main.py --dataset REDS --milestones 100 150 180 --endEpoch 200 --save_results all --do_test false
-python launch.py --n_GPUs 4 main.py --dataset REDS --milestones 100 150 180 --endEpoch 200 --save_results all --do_test false --do_validate false
+python launch.py --n_GPUs 4 main.py --dataset REDS --milestones 100 150 180 --end_epoch 200 --save_results all --do_test false
+python launch.py --n_GPUs 4 main.py --dataset REDS --milestones 100 150 180 --end_epoch 200 --save_results all --do_test false --do_validate false
 ```
 
 ```bash
 # Commands used to generate the below results
-python launch.py --n_GPUs 2 main.py --dataset GOPRO_Large --milestones 500 750 900 --endEpoch 1000
-python launch.py --n_GPUs 4 main.py --dataset REDS --milestones 100 150 180 --endEpoch 200 --do_test false
+python launch.py --n_GPUs 2 main.py --dataset GOPRO_Large --milestones 500 750 900 --end_epoch 1000
+python launch.py --n_GPUs 4 main.py --dataset REDS --milestones 100 150 180 --end_epoch 200 --do_test false
 ```
 
 For more advanced usage, please take a look at src/option.py

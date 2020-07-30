@@ -33,7 +33,7 @@ class Model(nn.Module):
             self.model.D = None
 
         self.to(args.device, dtype=args.dtype, non_blocking=True)
-        self.load(args.loadEpoch, path=args.pretrained)
+        self.load(args.load_epoch, path=args.pretrained)
 
     def parallelize(self):
         if self.args.distributed:

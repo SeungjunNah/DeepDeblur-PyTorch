@@ -109,7 +109,7 @@ class Optimizer(object):
                             if self.scheduler.last_epoch > 1:
                                 epoch = self.scheduler.last_epoch
                             else:
-                                epoch = self.args.startEpoch - 1
+                                epoch = self.args.start_epoch - 1
 
                         # if False:
                         #     # option 1. new scheduler
@@ -145,7 +145,7 @@ class Optimizer(object):
         else:
             self.D = None
 
-        self.load(args.loadEpoch)
+        self.load(args.load_epoch)
 
     def zero_grad(self):
         self.G.zero_grad()
