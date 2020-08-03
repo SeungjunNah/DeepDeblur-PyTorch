@@ -201,6 +201,8 @@ if args.demo_input_dir:
     args.demo = True
 
 if args.demo:
+    assert os.path.basename(args.save_dir) != now, 'You should specify pretrained directory by setting --save_dir SAVE_DIR'
+
     args.data_train = ''
     args.data_val = ''
     args.data_test = ''
