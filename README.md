@@ -136,11 +136,11 @@ Download | [link](https://drive.google.com/file/d/1-wGC6s2D2ba-PSV60AeHf48HtYd9J
 
 * Mixed-precision training results
 
-Dataset | GOPRO_Large | REDS
-:--:|:--:|:--:
-PSNR| 30.42 | 32.95
-SSIM| 0.9021 | 0.9209
-Download | [link](https://drive.google.com/file/d/1TgiiiB-4lwWIIy8c-oSSkIy5g4GvDBKB/view?usp=sharing) | [link](https://drive.google.com/file/d/10hH5vtfGUUpy8jLvIBRCBqRoEhWRO1va/view?usp=sharing)
+Dataset | GOPRO_Large | REDS | REDS (GOPRO_Large pretrained)
+:--:|:--:|:--:|:--:
+PSNR| 30.42 | 32.95 | 33.13
+SSIM| 0.9021 | 0.9209 | 0.9237
+Download | [link](https://drive.google.com/file/d/1TgiiiB-4lwWIIy8c-oSSkIy5g4GvDBKB/view?usp=sharing) | [link](https://drive.google.com/file/d/10hH5vtfGUUpy8jLvIBRCBqRoEhWRO1va/view?usp=sharing) | [link](https://drive.google.com/file/d/1YV6uhGLDBbvaiWN2_cYgUhYakmvLMAM9/view?usp=sharing)
 
 Mixed-precision training uses less memory and is faster, especially on NVIDIA Turing-generation GPUs.
 Loss scaling technique is adopted to cope with the narrow representation range of fp16.
@@ -156,11 +156,12 @@ time (s) | 0.943 | 0.330
 
 ## Demo
 
-To use the trained models, download files, unzip, and put them under DeepDeblur-PyTorch/experiment
+To use the trained models, download files, unzip, and put them under DeepDeblur.pytorch/experiment
 * [GOPRO_L1](https://drive.google.com/file/d/1AfZhyUXEA8_UdZco9EdtpWjTBAb8BbWv/view?usp=sharing)
 * [REDS_L1](https://drive.google.com/file/d/1UwFNXnGBz2rCBxhvq2gKt9Uhj5FeEsa4/view?usp=sharing)
 * [GOPRO_L1_amp](https://drive.google.com/file/d/1ZcP3l2ZXj-C6yrDge5d3UxcaAKRN725w/view?usp=sharing)
 * [REDS_L1_amp](https://drive.google.com/file/d/1do_HOjVFj2AYTX4BbwQ0enELRWtzhW6F/view?usp=sharing)
+* [REDS_L1_amp_pretrained](https://drive.google.com/file/d/1BkEgUrFtOSymVnaADfptOvqfNOYiD3J1/view?usp=sharing)
 
 ```bash
 python main.py --save_dir SAVE_DIR --demo true --demo_input_dir INPUT_DIR_NAME --demo_output_dir OUTPUT_DIR_NAME
