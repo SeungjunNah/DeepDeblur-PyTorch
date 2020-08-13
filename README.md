@@ -156,7 +156,7 @@ time (s) | 0.943 | 0.330
 
 ## Demo
 
-To use the trained models, download files, unzip, and put them under DeepDeblur.pytorch/experiment
+To use the trained models, download files, unzip, and put them under DeepDeblur-PyTorch/experiment
 * [GOPRO_L1](https://drive.google.com/file/d/1AfZhyUXEA8_UdZco9EdtpWjTBAb8BbWv/view?usp=sharing)
 * [REDS_L1](https://drive.google.com/file/d/1UwFNXnGBz2rCBxhvq2gKt9Uhj5FeEsa4/view?usp=sharing)
 * [GOPRO_L1_amp](https://drive.google.com/file/d/1ZcP3l2ZXj-C6yrDge5d3UxcaAKRN725w/view?usp=sharing)
@@ -166,7 +166,7 @@ To use the trained models, download files, unzip, and put them under DeepDeblur.
 ```bash
 python main.py --save_dir SAVE_DIR --demo true --demo_input_dir INPUT_DIR_NAME --demo_output_dir OUTPUT_DIR_NAME
 # SAVE_DIR is the experiment directory where the parameters are saved (GOPRO_L1, REDS_L1)
-# SAVE_DIR is relative to DeepDeblur.pyTorch/experiment
+# SAVE_DIR is relative to DeepDeblur-PyTorch/experiment
 # demo_output_dir is by default SAVE_DIR/results
 # DEMO_INPUT_DIR and DEMO_OUTPUT_DIR can be both absolute or relative to os.getenv("HOME")
 # image dataloader looks into DEMO_INPUT_DIR, recursively
