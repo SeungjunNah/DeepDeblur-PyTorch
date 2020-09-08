@@ -26,10 +26,12 @@ Original Torch7 implementaion is available [here](https://github.com/SeungjunNah
 * PyTorch 1.6
 * tqdm
 * imageio
-* scikit-image 0.16.2
+* scikit-image
 * numpy
 * matplotlib
 * readline
+
+Please refer to [this issue](https://github.com/SeungjunNah/DeepDeblur-PyTorch/issues/5#issuecomment-651177352) for the versions.
 
 For mixed-precision training, PyTorch >= 1.6 is required. If you don't need mixed-precision operation, PyTorch 1.5 is enough.
 
@@ -40,11 +42,24 @@ For mixed-precision training, PyTorch >= 1.6 is required. If you don't need mixe
 
 ## Usage examples
 
-Put the datasets on a desired directory. By default, the data root is set as '~/Research/dataset'  
+* Preparing dataset
+
+Before running the code, put the datasets on a desired directory. By default, the data root is set as '~/Research/dataset'  
 See: [src/option.py](src/option.py)
 ```python
 group_data.add_argument('--data_root', type=str, default='~/Research/dataset', help='dataset root location')
 ```
+Put your dataset under ```args.data_root```.
+
+The dataset location should be like:
+```bash
+# GOPRO_Large dataset
+~/Research/dataset/GOPRO_Large/train/GOPR0372_07_00/blur_gamma/....
+# REDS dataset
+~/Research/dataset/REDS/train/train_blur/000/...
+```
+
+* Example commands
 
 ```bash
 # single GPU training
