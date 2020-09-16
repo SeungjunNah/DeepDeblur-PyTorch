@@ -183,18 +183,17 @@ python main.py --save_dir SAVE_DIR --demo true --demo_input_dir INPUT_DIR_NAME -
 # SAVE_DIR is the experiment directory where the parameters are saved (GOPRO_L1, REDS_L1)
 # SAVE_DIR is relative to DeepDeblur-PyTorch/experiment
 # demo_output_dir is by default SAVE_DIR/results
-# DEMO_INPUT_DIR and DEMO_OUTPUT_DIR can be both absolute or relative to os.getenv("HOME")
 # image dataloader looks into DEMO_INPUT_DIR, recursively
 
 # example
 # single GPU (GOPRO_Large, single precision)
-python main.py --save_dir GOPRO_L1 --demo true --demo_input_dir Research/dataset/GOPRO_Large/test/GOPR0384_11_00/blur_gamma
+python main.py --save_dir GOPRO_L1 --demo true --demo_input_dir ~/Research/dataset/GOPRO_Large/test/GOPR0384_11_00/blur_gamma
 # single GPU (GOPRO_Large, amp-trained model, half precision)
-python main.py --save_dir GOPRO_L1_amp --demo true --demo_input_dir Research/dataset/GOPRO_Large/test/GOPR0384_11_00/blur_gamma --precision half
+python main.py --save_dir GOPRO_L1_amp --demo true --demo_input_dir ~/Research/dataset/GOPRO_Large/test/GOPR0384_11_00/blur_gamma --precision half
 # multi-GPU (REDS, single precision)
-python launch.py --n_GPUs 2 main.py --save_dir REDS_L1 --demo true --demo_input_dir Research/dataset/REDS/test/test_blur --demo_output_dir OUTPUT_DIR_NAME
+python launch.py --n_GPUs 2 main.py --save_dir REDS_L1 --demo true --demo_input_dir ~/Research/dataset/REDS/test/test_blur --demo_output_dir OUTPUT_DIR_NAME
 # multi-GPU (REDS, half precision)
-python launch.py --n_GPUs 2 main.py --save_dir REDS_L1 --demo true --demo_input_dir Research/dataset/REDS/test/test_blur --demo_output_dir OUTPUT_DIR_NAME --precision half
+python launch.py --n_GPUs 2 main.py --save_dir REDS_L1 --demo true --demo_input_dir ~/Research/dataset/REDS/test/test_blur --demo_output_dir OUTPUT_DIR_NAME --precision half
 ```
 
 ## Differences from the original code

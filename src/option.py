@@ -211,12 +211,10 @@ if args.demo:
     args.do_validate = False
     args.do_test = False
 
-    if args.demo_input_dir.find('/') != 0 and args.demo_input_dir.find('.') != 0:
-        args.demo_input_dir = os.path.join(str(os.getenv("HOME")), args.demo_input_dir)
-
+    assert len(args.demo_input_dir) > 0, 'Please specify demo_input_dir!'
+    args.demo.input_dir = os.path.expanduser(args.demo.input_dir)
     if args.demo_output_dir:
-        if args.demo_output_dir.find('/') != 0 and args.demo_output_dir.find('.') != 0:
-            args.demo_output_dir = os.path.join(str(os.getenv("HOME")), args.demo_output_dir)
+        args.demo.output_dir = os.path.expanduser(args.demo.output_dir)
 
     args.save_results = 'all'
 
