@@ -212,9 +212,9 @@ if args.demo:
     args.do_test = False
 
     assert len(args.demo_input_dir) > 0, 'Please specify demo_input_dir!'
-    args.demo.input_dir = os.path.expanduser(args.demo.input_dir)
+    args.demo_input_dir = os.path.expanduser(args.demo_input_dir)
     if args.demo_output_dir:
-        args.demo.output_dir = os.path.expanduser(args.demo.output_dir)
+        args.demo_output_dir = os.path.expanduser(args.demo_output_dir)
 
     args.save_results = 'all'
 
