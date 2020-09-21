@@ -36,15 +36,23 @@ class Model(nn.Module):
         self.load(args.load_epoch, path=args.pretrained)
 
     def parallelize(self):
-        if self.args.distributed:
-            self.model.G = DistributedDataParallel(self.model.G, device_ids=[self.args.rank], output_device=self.args.rank)
-            if self.model.D is not None:
-                self.model.D = DistributedDataParallel(self.model.D, device_ids=[self.args.rank], output_device=self.args.rank)
+        if self.args.device_type == 'cuda':
+            if self.args.distributed:
+                Parallel = DistributedDataParallel
+                parallel_args = {
+                    "device_ids": [self.args.rank],
+                    "output_device": self.args.rank,
+                }
+            else:
+                Parallel = DataParallel
+                parallel_args = {
+                    'device_ids': list(range(self.n_GPUs)),
+                    'output_device': self.args.rank # always 0
+                }
 
-        else:
-            self.model.G = DataParallel(self.model.G, range(self.n_GPUs))
-            if self.model.D is not None:
-                self.model.D = DataParallel(self.model.D, range(self.n_GPUs))
+                for model_key in self.model:
+                    if self.model[model_key] is not None:
+                        self.model[model_key] = Parallel(self.model[model_key], **parallel_args)
 
     def forward(self, input):
         return self.model.G(input)

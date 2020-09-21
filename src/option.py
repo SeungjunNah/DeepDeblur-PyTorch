@@ -236,8 +236,7 @@ if args.rank == 0:
         file.write('\n')
 
 # device and type
-cuda = args.device_type == 'cuda'
-if cuda and not torch.cuda.is_available():
+if args.device_type == 'cuda' and not torch.cuda.is_available():
     raise Exception("GPU not available!")
 
 if not args.distributed:
@@ -263,9 +262,10 @@ def setup(args):
     # set seed for processes (distributed: different seed for each process)
     # model parameters are synchronized explicitly at initial
     torch.manual_seed(args.seed)
-    torch.cuda.set_device(args.device)
-    if args.rank == 0:
-        torch.cuda.manual_seed_all(args.seed)
+    if args.device_type == 'cuda':
+        torch.cuda.set_device(args.device)
+        if args.rank == 0:
+            torch.cuda.manual_seed_all(args.seed)
 
     return args
 
