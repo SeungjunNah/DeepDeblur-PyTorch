@@ -76,7 +76,7 @@ class Trainer():
         self.criterion.epoch = epoch
 
         if not self.is_slave:
-            print('[_epoch {} / lr {:.2e}]'.format(
+            print('[Epoch {} / lr {:.2e}]'.format(
                 epoch, self.optimizer.get_lr()
             ))
 
