@@ -33,8 +33,6 @@ Original Torch7 implementaion is available [here](https://github.com/SeungjunNah
 
 Please refer to [this issue](https://github.com/SeungjunNah/DeepDeblur-PyTorch/issues/5#issuecomment-651177352) for the versions.
 
-For mixed-precision training, PyTorch >= 1.6 is required. If you don't need mixed-precision operation, PyTorch 1.5 is enough.
-
 ## Datasets
 
 * GOPRO_Large: [link](https://seungjunnah.github.io/Datasets/gopro)
