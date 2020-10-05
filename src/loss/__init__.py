@@ -155,8 +155,7 @@ class Loss(torch.nn.modules.loss._Loss):
         loss = 0
 
         def _ms_forward(input, target, func):
-
-            if isinstance(input, list) or isinstance(input, tuple): # loss for list output
+            if isinstance(input, (list, tuple)): # loss for list output
                 _loss = []
                 for (input_i, target_i) in zip(input, target):
                     _loss += [func(input_i, target_i)]
@@ -205,8 +204,7 @@ class Loss(torch.nn.modules.loss._Loss):
         return loss
 
     def measure(self, input, target):
-
-        if isinstance(input, list) or isinstance(input, tuple):
+        if isinstance(input, (list, tuple)):
             self.measure(input[0], target[0])
             return
         elif isinstance(input, dict):

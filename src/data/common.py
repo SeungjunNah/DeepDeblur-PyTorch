@@ -7,7 +7,7 @@ import torch
 
 def _apply(func, x):
 
-    if isinstance(x, list) or isinstance(x, tuple):
+    if isinstance(x, (list, tuple)):
         return [_apply(func, x_i) for x_i in x]
     elif isinstance(x, dict):
         y = {}
@@ -20,7 +20,7 @@ def _apply(func, x):
 def crop(*args, ps=256):    # patch_size
     # args = [input, target]
     def _get_shape(*args):
-        if isinstance(args[0], list) or isinstance(args[0], tuple):
+        if isinstance(args[0], (list, tuple)):
             return _get_shape(args[0][0])
         elif isinstance(args[0], dict):
             return _get_shape(list(args[0].values())[0])
@@ -118,16 +118,16 @@ def pad(img, divisor=4, pad_width=None, negative=False):
                     pad_h = pad_h.item()
                 if isinstance(pad_w, torch.Tensor):
                     pad_w = pad_w.item()
-                
+
                 pad_width = (0, pad_w, 0, pad_h)
             except:
                 pass
-        
+
             if negative:
                 pad_width = [-val for val in pad_width]
 
         img = torch.nn.functional.pad(img, pad_width, 'reflect')
-        
+
         return img, pad_width
 
     if isinstance(img, np.ndarray):

@@ -159,7 +159,7 @@ class Trainer():
                     tq.set_description(self.criterion.get_loss_desc())
 
             if self.args.save_results != 'none':
-                if isinstance(output, tuple) or isinstance(output, list):
+                if isinstance(output, (list, tuple)):
                     result = output[0]  # select last output in a pyramid
                 elif isinstance(output, torch.Tensor):
                     result = output

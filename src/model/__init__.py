@@ -11,7 +11,7 @@ from torch.nn.utils import parameters_to_vector, vector_to_parameters
 
 from .discriminator import Discriminator
 
-from utils import interact, Map
+from utils import interact
 
 class Model(nn.Module):
     def __init__(self, args):
@@ -62,29 +62,24 @@ class Model(nn.Module):
         return model_path
 
     def state_dict(self):
-        state_dict = Map()
+        state_dict = {}
+        for model_key in self.model:
+            parallelized = isinstance(self.model[model_key], (DataParallel, DistributedDataParallel))
+            if parallelized:
+                state_dict[model_key] = self.model[model_key].module.state_dict()
+            else:
+                state_dict[model_key] = self.model[model_key].state_dict()
 
-        if isinstance(self.model.G, DataParallel) or isinstance(self.model.G, DistributedDataParallel):
-            state_dict.G = self.model.G.module.state_dict()
-            if self.model.D is not None:
-                state_dict.D = self.model.D.module.state_dict()
-        else:
-            state_dict.G = self.model.G.state_dict()
-            if self.model.D is not None:
-                state_dict.D = self.model.D.state_dict()
+        return state_dict
 
-        return state_dict.toDict()
-
-    def load_state_dict(self, state_dict):
-        state_dict = Map(**state_dict)
-        if isinstance(self.model.G, DataParallel) or isinstance(self.model.G, DistributedDataParallel):
-            self.model.G.module.load_state_dict(state_dict.G)
-            if self.model.D is not None:
-                self.model.D.module.load_state_dict(state_dict.D)
-        else:
-            self.model.G.load_state_dict(state_dict.G)
-            if self.model.D is not None:
-                self.model.D.load_state_dict(state_dict.D)
+    def load_state_dict(self, state_dict, strict=True):
+        for model_key in self.model:
+            parallelized = isinstance(self.model[model_key], (DataParallel, DistributedDataParallel))
+            if model_key in state_dict:
+                if parallelized:
+                    self.model[model_key].module.load_state_dict(state_dict[model_key], strict)
+                else:
+                    self.model[model_key].load_state_dict(state_dict[model_key], strict)
 
     def save(self, epoch):
         torch.save(self.state_dict(), self._save_path(epoch))
