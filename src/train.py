@@ -59,6 +59,7 @@ class Trainer():
     def load(self, epoch=None, pretrained=None):
         if epoch is None:
             epoch = self.args.load_epoch
+        self.epoch = epoch
         self.model.load(epoch, pretrained)
         self.optimizer.load(epoch)
         self.criterion.load(epoch)

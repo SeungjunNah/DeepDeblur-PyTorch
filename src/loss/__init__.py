@@ -348,7 +348,6 @@ class Loss(torch.nn.modules.loss._Loss):
     def save(self):
 
         state = {
-            'state_dict': self.state_dict(),
             'loss_stat': self.loss_stat,
             'metric_stat': self.metric_stat,
         }
@@ -362,7 +361,6 @@ class Loss(torch.nn.modules.loss._Loss):
         if os.path.exists(self.save_name):
             state = torch.load(self.save_name, map_location=self.args.device)
 
-            self.load_state_dict(state['state_dict'])
             self.loss_stat = state['loss_stat']
             if 'metric_stat' in state:
                 self.metric_stat = state['metric_stat']

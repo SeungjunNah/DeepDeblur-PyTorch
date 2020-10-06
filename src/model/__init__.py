@@ -64,11 +64,12 @@ class Model(nn.Module):
     def state_dict(self):
         state_dict = {}
         for model_key in self.model:
-            parallelized = isinstance(self.model[model_key], (DataParallel, DistributedDataParallel))
-            if parallelized:
-                state_dict[model_key] = self.model[model_key].module.state_dict()
-            else:
-                state_dict[model_key] = self.model[model_key].state_dict()
+            if self.model[model_key] is not None:
+                parallelized = isinstance(self.model[model_key], (DataParallel, DistributedDataParallel))
+                if parallelized:
+                    state_dict[model_key] = self.model[model_key].module.state_dict()
+                else:
+                    state_dict[model_key] = self.model[model_key].state_dict()
 
         return state_dict
 
