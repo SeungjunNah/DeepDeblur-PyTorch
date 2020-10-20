@@ -50,9 +50,9 @@ class Model(nn.Module):
                     'output_device': self.args.rank # always 0
                 }
 
-                for model_key in self.model:
-                    if self.model[model_key] is not None:
-                        self.model[model_key] = Parallel(self.model[model_key], **parallel_args)
+            for model_key in self.model:
+                if self.model[model_key] is not None:
+                    self.model[model_key] = Parallel(self.model[model_key], **parallel_args)
 
     def forward(self, input):
         return self.model.G(input)
